@@ -11,7 +11,6 @@ import (
 )
 
 type IUserController interface {
-	// What is context?
 	SignUp(c echo.Context) error
 	LogIn(c echo.Context) error
 	LogOut(c echo.Context) error
@@ -47,7 +46,6 @@ func (uc *userController) LogIn(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	// What is cookie?
 	cookie := new(http.Cookie)
 	cookie.Name = "token"
 	cookie.Value = tokenString

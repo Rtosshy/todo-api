@@ -22,7 +22,7 @@ func (uv *userValidator) UserValidate(user model.User) error {
 		validation.Field(
 			&user.Email,
 			validation.Required.Error("email is required"),
-			validation.RuneLength(1, 30).Error("limited max 30 char"),
+			validation.RuneLength(1, 50).Error("limited max 50 char"),
 			is.Email.Error("is not valid email format"),
 		),
 		validation.Field(
