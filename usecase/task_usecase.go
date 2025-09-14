@@ -4,15 +4,16 @@ import (
 	"fmt"
 	"todo-api/model"
 	"todo-api/repository"
+	"todo-api/types"
 	"todo-api/validator"
 )
 
 type ITaskUsecase interface {
-	GetAllTasks(userID uint) ([]model.TaskResponse, error)
-	GetTaskById(userID uint, taskID uint) (model.TaskResponse, error)
+	GetAllTasks(userID types.UserID) ([]model.TaskResponse, error)
+	GetTaskById(userID types.UserID, taskID types.TaskID) (model.TaskResponse, error)
 	CreateTask(task model.Task) (model.TaskResponse, error)
-	UpdateTask(task model.Task, userID uint, taskID uint) (model.TaskResponse, error)
-	DeleteTask(userID uint, taskID uint) error
+	UpdateTask(task model.Task, userID types.UserID, taskID types.TaskID) (model.TaskResponse, error)
+	DeleteTask(userID types.UserID, taskID types.TaskID) error
 }
 
 type taskUsecase struct {
@@ -24,7 +25,7 @@ func NewTaskUsecase(tr repository.ITaskRepository, tv validator.ITaskValidator) 
 	return &taskUsecase{tr, tv}
 }
 
-func (tu *taskUsecase) GetAllTasks(userID uint) ([]model.TaskResponse, error) {
+func (tu *taskUsecase) GetAllTasks(userID types.UserID) ([]model.TaskResponse, error) {
 	tasks := []model.Task{}
 	if err := tu.tr.GetAllTasks(&tasks, userID); err != nil {
 		return nil, err
@@ -42,7 +43,7 @@ func (tu *taskUsecase) GetAllTasks(userID uint) ([]model.TaskResponse, error) {
 	return resTasks, nil
 }
 
-func (tu *taskUsecase) GetTaskById(userID uint, taskID uint) (model.TaskResponse, error) {
+func (tu *taskUsecase) GetTaskById(userID types.UserID, taskID types.TaskID) (model.TaskResponse, error) {
 	task := model.Task{}
 	if err := tu.tr.GetTaskById(&task, userID, taskID); err != nil {
 		return model.TaskResponse{}, err
@@ -72,7 +73,7 @@ func (tu *taskUsecase) CreateTask(task model.Task) (model.TaskResponse, error) {
 	return resTask, nil
 }
 
-func (tu *taskUsecase) UpdateTask(task model.Task, userID uint, taskID uint) (model.TaskResponse, error) {
+func (tu *taskUsecase) UpdateTask(task model.Task, userID types.UserID, taskID types.TaskID) (model.TaskResponse, error) {
 	if err := tu.tv.TaskValidate(task); err != nil {
 		return model.TaskResponse{}, err
 	}
@@ -88,7 +89,7 @@ func (tu *taskUsecase) UpdateTask(task model.Task, userID uint, taskID uint) (mo
 	return resTask, nil
 }
 
-func (tu *taskUsecase) DeleteTask(userID uint, taskID uint) error {
+func (tu *taskUsecase) DeleteTask(userID types.UserID, taskID types.TaskID) error {
 	if err := tu.tr.DeleteTask(userID, taskID); err != nil {
 		fmt.Println(err)
 	}

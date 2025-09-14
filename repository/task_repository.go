@@ -3,17 +3,18 @@ package repository
 import (
 	"fmt"
 	"todo-api/model"
+	"todo-api/types"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
 type ITaskRepository interface {
-	GetAllTasks(tasks *[]model.Task, userID uint) error
-	GetTaskById(task *model.Task, userID uint, taskID uint) error
+	GetAllTasks(tasks *[]model.Task, userID types.UserID) error
+	GetTaskById(task *model.Task, userID types.UserID, taskID types.TaskID) error
 	CreateTask(task *model.Task) error
-	UpdateTask(task *model.Task, userID uint, taskID uint) error
-	DeleteTask(userID uint, taskID uint) error
+	UpdateTask(task *model.Task, userID types.UserID, taskID types.TaskID) error
+	DeleteTask(userID types.UserID, taskID types.TaskID) error
 }
 
 type taskRepository struct {
@@ -24,14 +25,14 @@ func NewTaskRepository(db *gorm.DB) ITaskRepository {
 	return &taskRepository{db}
 }
 
-func (tr *taskRepository) GetAllTasks(tasks *[]model.Task, userID uint) error {
+func (tr *taskRepository) GetAllTasks(tasks *[]model.Task, userID types.UserID) error {
 	if err := tr.db.Joins("User").Where("user_id=?", userID).Order("created_at").Find(tasks).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (tr *taskRepository) GetTaskById(task *model.Task, userID uint, taskID uint) error {
+func (tr *taskRepository) GetTaskById(task *model.Task, userID types.UserID, taskID types.TaskID) error {
 	if err := tr.db.Joins("User").Where("user_id=?", userID).First(task, taskID).Error; err != nil {
 		return err
 	}
@@ -45,7 +46,7 @@ func (tr *taskRepository) CreateTask(task *model.Task) error {
 	return nil
 }
 
-func (tr *taskRepository) UpdateTask(task *model.Task, userID uint, taskID uint) error {
+func (tr *taskRepository) UpdateTask(task *model.Task, userID types.UserID, taskID types.TaskID) error {
 	result := tr.db.Model(task).Clauses(clause.Returning{}).Where("id=? AND user_id=?", taskID, userID).Update("title", task.Title)
 	if result.Error != nil {
 		return result.Error
@@ -56,7 +57,7 @@ func (tr *taskRepository) UpdateTask(task *model.Task, userID uint, taskID uint)
 	return nil
 }
 
-func (tr *taskRepository) DeleteTask(userID uint, taskID uint) error {
+func (tr *taskRepository) DeleteTask(userID types.UserID, taskID types.TaskID) error {
 	result := tr.db.Where("id=? AND user_id=?", taskID, userID).Delete(&model.Task{})
 	if result.Error != nil {
 		return result.Error

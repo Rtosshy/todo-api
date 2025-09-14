@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 	"todo-api/model"
+	"todo-api/types"
 	"todo-api/usecase"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -29,9 +30,9 @@ func NewTaskController(tu usecase.ITaskUsecase) ITaskController {
 func (tc *taskController) GetAllTasks(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
-	userID := claims["user_id"]
+	userID := types.UserID(claims["user_id"].(float64))
 
-	taskRes, err := tc.tu.GetAllTasks(uint(userID.(float64)))
+	taskRes, err := tc.tu.GetAllTasks(userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -41,11 +42,11 @@ func (tc *taskController) GetAllTasks(c echo.Context) error {
 func (tc *taskController) GetTaskById(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
-	userID := claims["user_id"]
-	id := c.Param("task_id")
-	taskID, _ := strconv.Atoi(id)
+	userID := types.UserID(claims["user_id"].(float64))
+	ID, _ := strconv.Atoi(c.Param("task_id"))
+	taskID := types.TaskID(ID)
 
-	taskRes, err := tc.tu.GetTaskById(uint(userID.(float64)), uint(taskID))
+	taskRes, err := tc.tu.GetTaskById(userID, taskID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -55,13 +56,13 @@ func (tc *taskController) GetTaskById(c echo.Context) error {
 func (tc *taskController) CreateTask(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
-	userID := claims["user_id"]
+	userID := types.UserID(claims["user_id"].(float64))
 
 	task := model.Task{}
 	if err := c.Bind(&task); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
-	task.UserID = uint(userID.(float64))
+	task.UserID = userID
 	taskRes, err := tc.tu.CreateTask(task)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -72,16 +73,16 @@ func (tc *taskController) CreateTask(c echo.Context) error {
 func (tc *taskController) UpdateTask(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
-	userID := claims["user_id"]
-	id := c.Param("task_id")
-	taskID, _ := strconv.Atoi(id)
+	userID := types.UserID(claims["user_id"].(float64))
+	ID, _ := strconv.Atoi(c.Param("task_id"))
+	taskID := types.TaskID(ID)
 
 	task := model.Task{}
 	if err := c.Bind(&task); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	taskRes, err := tc.tu.UpdateTask(task, uint(userID.(float64)), uint(taskID))
+	taskRes, err := tc.tu.UpdateTask(task, userID, taskID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -91,11 +92,11 @@ func (tc *taskController) UpdateTask(c echo.Context) error {
 func (tc *taskController) DeleteTask(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
-	userID := claims["user_id"]
-	id := c.Param("task_id")
-	taskID, _ := strconv.Atoi(id)
+	userID := types.UserID(claims["user_id"].(float64))
+	ID, _ := strconv.Atoi(c.Param("task_id"))
+	taskID := types.TaskID(ID)
 
-	err := tc.tu.DeleteTask(uint(userID.(float64)), uint(taskID))
+	err := tc.tu.DeleteTask(userID, taskID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
