@@ -1,6 +1,6 @@
 module todo-api
 
-go 1.25.1
+go 1.25.0
 
 require (
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
