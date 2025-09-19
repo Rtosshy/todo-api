@@ -7,7 +7,7 @@ import (
 	"todo-api/model"
 	"todo-api/usecase"
 
-	"github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v4"
 )
 
 type IUserController interface {
