@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"todo-api/controller"
@@ -11,9 +12,15 @@ import (
 )
 
 func NewRouter(uc controller.IUserController, tc controller.ITaskController) *echo.Echo {
+	feURL := os.Getenv("FE_URL")
+	fmt.Printf("▶︎ Loaded FE_URL: %q\n", feURL)
+
+	apiDomain := os.Getenv("API_DOMAIN")
+	fmt.Printf("▶︎ Loaded API_DOMAIN: %q\n", apiDomain)
+
 	e := echo.New()
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost:3000", os.Getenv("FE_URL")},
+		AllowOrigins: []string{"http://localhost:3000", feURL},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept,
 			echo.HeaderAccessControlAllowHeaders, echo.HeaderXCSRFToken},
 		AllowMethods:     []string{"GET", "PUT", "POST", "DELETE"},
@@ -21,7 +28,7 @@ func NewRouter(uc controller.IUserController, tc controller.ITaskController) *ec
 	}))
 	e.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
 		CookiePath:     "/",
-		CookieDomain:   os.Getenv("API_DOMAIN"),
+		CookieDomain:   apiDomain,
 		CookieHTTPOnly: true,
 		CookieSameSite: http.SameSiteNoneMode,
 		// CookieSameSite: http.SameSiteDefaultMode,
