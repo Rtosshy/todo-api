@@ -7,7 +7,7 @@ import (
 	"todo-api/repository"
 	"todo-api/validator"
 
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
