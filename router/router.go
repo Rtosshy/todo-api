@@ -18,6 +18,13 @@ func NewRouter(uc controller.IUserController, tc controller.ITaskController) *ec
 	apiDomain := os.Getenv("API_DOMAIN")
 	fmt.Printf("▶︎ Loaded API_DOMAIN: %q\n", apiDomain)
 
+	env := os.Getenv("ENV")
+	isProd := env == "prod"
+	sameSite := http.SameSiteLaxMode
+	if !isProd {
+		sameSite = http.SameSiteNoneMode
+	}
+
 	e := echo.New()
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"http://localhost:3000", feURL},
@@ -30,9 +37,8 @@ func NewRouter(uc controller.IUserController, tc controller.ITaskController) *ec
 		CookiePath:     "/",
 		CookieDomain:   apiDomain,
 		CookieHTTPOnly: true,
-		CookieSameSite: http.SameSiteNoneMode,
-		// CookieSameSite: http.SameSiteDefaultMode,
-		// CookieMaxAge: 60,
+		CookieSameSite: sameSite,
+		CookieMaxAge:   60 * 60 * 24,
 	}))
 	e.POST("/signup", uc.SignUp)
 	e.POST("/login", uc.LogIn)
