@@ -1,4 +1,4 @@
-FROM golang:latest
+FROM golang:1.25.0
 
 WORKDIR /app
 
@@ -22,4 +22,4 @@ EXPOSE 8080
 
 ENV PATH="/usr/local/go/bin:$(go env GOPATH)/bin:/root/go/bin:${PATH}"
 
-CMD ["air", "-c", ".air.toml"]
+CMD ["sh", "-c", "go run migrate/migrate.go && exec air -c .air.toml"]
