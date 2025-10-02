@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"fmt"
 	"todo-api/model"
 	"todo-api/repository"
 	"todo-api/types"
@@ -13,7 +12,18 @@ type ITaskUsecase interface {
 	GetTaskById(userID types.UserID, taskID types.TaskID) (model.TaskResponse, error)
 	CreateTask(task model.Task) (model.TaskResponse, error)
 	UpdateTask(task model.Task, userID types.UserID, taskID types.TaskID) (model.TaskResponse, error)
+	UpdateTaskStatus(task model.Task, userID types.UserID, taskID types.TaskID) (model.TaskResponse, error)
 	DeleteTask(userID types.UserID, taskID types.TaskID) error
+}
+
+func toTaskResponse(t model.Task) model.TaskResponse {
+	return model.TaskResponse{
+		ID:        t.ID,
+		Title:     t.Title,
+		Status:    t.Status,
+		CreatedAt: t.CreatedAt,
+		UpdatedAt: t.UpdatedAt,
+	}
 }
 
 type taskUsecase struct {
@@ -30,15 +40,9 @@ func (tu *taskUsecase) GetAllTasks(userID types.UserID) ([]model.TaskResponse, e
 	if err := tu.tr.GetAllTasks(&tasks, userID); err != nil {
 		return nil, err
 	}
-	resTasks := []model.TaskResponse{}
-	for _, v := range tasks {
-		t := model.TaskResponse{
-			ID:        v.ID,
-			Title:     v.Title,
-			CreatedAt: v.CreatedAt,
-			UpdatedAt: v.UpdatedAt,
-		}
-		resTasks = append(resTasks, t)
+	resTasks := make([]model.TaskResponse, len(tasks))
+	for i, v := range tasks {
+		resTasks[i] = toTaskResponse(v)
 	}
 	return resTasks, nil
 }
@@ -48,12 +52,7 @@ func (tu *taskUsecase) GetTaskById(userID types.UserID, taskID types.TaskID) (mo
 	if err := tu.tr.GetTaskById(&task, userID, taskID); err != nil {
 		return model.TaskResponse{}, err
 	}
-	resTask := model.TaskResponse{
-		ID:        task.ID,
-		Title:     task.Title,
-		CreatedAt: task.CreatedAt,
-		UpdatedAt: task.UpdatedAt,
-	}
+	resTask := toTaskResponse(task)
 	return resTask, nil
 }
 
@@ -64,12 +63,7 @@ func (tu *taskUsecase) CreateTask(task model.Task) (model.TaskResponse, error) {
 	if err := tu.tr.CreateTask(&task); err != nil {
 		return model.TaskResponse{}, err
 	}
-	resTask := model.TaskResponse{
-		ID:        task.ID,
-		Title:     task.Title,
-		CreatedAt: task.CreatedAt,
-		UpdatedAt: task.UpdatedAt,
-	}
+	resTask := toTaskResponse(task)
 	return resTask, nil
 }
 
@@ -80,18 +74,21 @@ func (tu *taskUsecase) UpdateTask(task model.Task, userID types.UserID, taskID t
 	if err := tu.tr.UpdateTask(&task, userID, taskID); err != nil {
 		return model.TaskResponse{}, err
 	}
-	resTask := model.TaskResponse{
-		ID:        task.ID,
-		Title:     task.Title,
-		CreatedAt: task.CreatedAt,
-		UpdatedAt: task.UpdatedAt,
+	resTask := toTaskResponse(task)
+	return resTask, nil
+}
+
+func (tu *taskUsecase) UpdateTaskStatus(task model.Task, userID types.UserID, taskID types.TaskID) (model.TaskResponse, error) {
+	if err := tu.tr.UpdateTaskStatus(&task, userID, taskID); err != nil {
+		return model.TaskResponse{}, err
 	}
+	resTask := toTaskResponse(task)
 	return resTask, nil
 }
 
 func (tu *taskUsecase) DeleteTask(userID types.UserID, taskID types.TaskID) error {
 	if err := tu.tr.DeleteTask(userID, taskID); err != nil {
-		fmt.Println(err)
+		return err
 	}
 	return nil
 }
